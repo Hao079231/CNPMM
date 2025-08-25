@@ -1,43 +1,253 @@
-<script>
-  const API_BASE = "http://localhost:8081/api/user";
+<!DOCTYPE html>
+<html lang="en">
 
-  async function loadUsers() {
-    const res = await fetch(`${API_BASE}/list`);
-    const users = await res.json();
-    const list = document.getElementById("userList");
-    list.innerHTML = "";
-    users.forEach(u => {
-      const li = document.createElement("li");
-      li.textContent = `${u.fullName} (${u.email}) `;
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
 
-      // Delete button
-      const delBtn = document.createElement("button");
-      delBtn.textContent = "❌";
-      delBtn.onclick = async () => {
-        await fetch(`${API_BASE}/delete/${u._id}`, { method: "DELETE" });
-        loadUsers();
-      };
+    h1 {
+      text-align: center;
+    }
 
-      li.appendChild(delBtn);
-      list.appendChild(li);
-    });
-  }
+    .form-container,
+    .user-list {
+      margin: 20px 0;
+    }
 
-  document.getElementById("userForm").onsubmit = async (e) => {
-    e.preventDefault();
-    const fullName = document.getElementById("fullName").value;
-    const email = document.getElementById("email").value;
+    .form-container input {
+      padding: 8px;
+      margin: 5px;
+      width: 200px;
+    }
 
-    await fetch(`${API_BASE}/create`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fullName, email })
-    });
+    .form-container button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
 
-    document.getElementById("fullName").value = "";
-    document.getElementById("email").value = "";
-    loadUsers();
-  };
+    .form-container button:hover {
+      background-color: #45a049;
+    }
 
-  loadUsers();
-</script>
+    .user-list table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .user-list th,
+    .user-list td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .user-list th {
+      background-color: #f2f2f2;
+    }
+
+    .user-list button {
+      margin: 0 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background-color: #008CBA;
+      color: white;
+      border: none;
+    }
+
+    .edit-btn:hover {
+      background-color: #006d93;
+    }
+
+    .delete-btn {
+      background-color: #f44336;
+      color: white;
+      border: none;
+    }
+
+    .delete-btn:hover {
+      background-color: #da190b;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>User Management</h1>
+
+  <!-- Form để tạo hoặc cập nhật người dùng -->
+  <div class="form-container">
+    <h2>Create/Update User</h2>
+    <input type="hidden" id="userId">
+    <input type="text" id="fullName" placeholder="Full Name">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <input type="text" id="phone" placeholder="Phone">
+    <input type="text" id="address" placeholder="Address">
+    <button onclick="saveUser()">Save</button>
+    <button onclick="resetForm()" style="background-color: #ccc;">Reset</button>
+    <div id="error" class="error"></div>
+  </div>
+
+  <!-- Danh sách người dùng -->
+  <div class="user-list">
+    <h2>User List</h2>
+    <table id="userTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Password</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="userTableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // Gọi API để lấy danh sách người dùng
+    async function fetchUsers() {
+      try {
+        const response = await fetch('/api/user/list');
+        if (!response.ok) throw new Error('Failed to fetch users');
+        const users = await response.json();
+        renderUsers(users);
+      } catch (error) {
+        showError('Error fetching users: ' + error.message);
+      }
+    }
+
+    // Hiển thị danh sách người dùng trong bảng
+    function renderUsers(users) {
+      const tbody = document.getElementById('userTableBody');
+      tbody.innerHTML = '';
+      users.forEach(user => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${user._id}</td>
+          <td>${user.fullName}</td>
+          <td>${user.email}</td>
+          <td>${user.password}</td>
+          <td>${user.phone}</td>
+          <td>${user.address}</td>
+          <td>
+            <button class="edit-btn" onclick="editUser('${user._id}', '${user.fullName}', '${user.email}', '${user.password}', '${user.phone}', '${user.address}')">Edit</button>
+            <button class="delete-btn" onclick="deleteUser('${user._id}')">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Lưu người dùng (tạo mới hoặc cập nhật)
+    async function saveUser() {
+      const id = document.getElementById('userId').value;
+      const fullName = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const address = document.getElementById('address').value.trim();
+
+      if (!fullName || !email || !password || !phone || !address) {
+        showError('All fields are required');
+        return;
+      }
+
+      const user = { fullName, email, password, phone, address };
+      try {
+        if (id) {
+          // Cập nhật người dùng
+          const response = await fetch(`/api/user/update/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user),
+          });
+          if (!response.ok) throw new Error('Failed to update user');
+          showError('User updated successfully', false);
+        } else {
+          // Tạo người dùng mới
+          const response = await fetch('/api/user/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user),
+          });
+          if (!response.ok) throw new Error('Failed to create user');
+          showError('User created successfully', false);
+        }
+        resetForm();
+        fetchUsers();
+      } catch (error) {
+        showError('Error saving user: ' + error.message);
+      }
+    }
+
+    // Chỉnh sửa người dùng
+    function editUser(id, fullName, email, password, phone, address) {
+      document.getElementById('userId').value = id;
+      document.getElementById('fullName').value = fullName;
+      document.getElementById('email').value = email;
+      document.getElementById('password').value = password;
+      document.getElementById('phone').value = phone;
+      document.getElementById('address').value = address;
+    }
+
+    // Xóa người dùng
+    async function deleteUser(id) {
+      if (!confirm('Are you sure you want to delete this user?')) return;
+      try {
+        const response = await fetch(`/api/user/delete/${id}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to delete user');
+        showError('User deleted successfully', false);
+        fetchUsers();
+      } catch (error) {
+        showError('Error deleting user: ' + error.message);
+      }
+    }
+
+    // Đặt lại form
+    function resetForm() {
+      document.getElementById('userId').value = '';
+      document.getElementById('fullName').value = '';
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('phone').value = '';
+      document.getElementById('address').value = '';
+      showError('');
+    }
+
+    // Hiển thị thông báo lỗi hoặc thành công
+    function showError(message, isError = true) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = message;
+      errorDiv.style.color = isError ? 'red' : 'green';
+    }
+
+    // Tải danh sách người dùng khi trang được load
+    window.onload = fetchUsers;
+  </script>
+</body>
+
+</html>
