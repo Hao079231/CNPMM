@@ -1,0 +1,43 @@
+<script>
+  const API_BASE = "http://localhost:8081/api/user";
+
+  async function loadUsers() {
+    const res = await fetch(`${API_BASE}/list`);
+    const users = await res.json();
+    const list = document.getElementById("userList");
+    list.innerHTML = "";
+    users.forEach(u => {
+      const li = document.createElement("li");
+      li.textContent = `${u.fullName} (${u.email}) `;
+
+      // Delete button
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "❌";
+      delBtn.onclick = async () => {
+        await fetch(`${API_BASE}/delete/${u._id}`, { method: "DELETE" });
+        loadUsers();
+      };
+
+      li.appendChild(delBtn);
+      list.appendChild(li);
+    });
+  }
+
+  document.getElementById("userForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const fullName = document.getElementById("fullName").value;
+    const email = document.getElementById("email").value;
+
+    await fetch(`${API_BASE}/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fullName, email })
+    });
+
+    document.getElementById("fullName").value = "";
+    document.getElementById("email").value = "";
+    loadUsers();
+  };
+
+  loadUsers();
+</script>
