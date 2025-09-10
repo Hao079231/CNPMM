@@ -10,7 +10,8 @@ import {
     Input,
     Select,
     Button,
-    Breadcrumb
+    Breadcrumb,
+    InputNumber
 } from 'antd';
 import {
     SearchOutlined,
@@ -46,8 +47,9 @@ const ProductsPage = () => {
     const [sortBy, setSortBy] = useState('newest');
     const [minPrice, setMinPrice] = useState(null);
     const [maxPrice, setMaxPrice] = useState(null);
-    const [onSale, setOnSale] = useState(false);
-    const [minViews, setMinViews] = useState(null);
+
+    // Toggle advanced filter
+    const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
 
     useEffect(() => {
         fetchCategories();
@@ -65,7 +67,7 @@ const ProductsPage = () => {
         }
     };
 
-    const fetchProducts = async (page = 1, reset = true, overrideSearchTerm = null) => {
+    const fetchProducts = async (page = 1, reset = true, overrides = {}) => {
         try {
             if (page === 1) {
                 setLoading(true);
@@ -74,28 +76,37 @@ const ProductsPage = () => {
             }
             setError(null);
 
-            let response;
-
-            const finalSearchTerm = overrideSearchTerm !== null ? overrideSearchTerm : searchTerm;
+            const finalSearchTerm = Object.prototype.hasOwnProperty.call(overrides, 'searchTerm')
+                ? overrides.searchTerm
+                : searchTerm;
+            const finalCategory = Object.prototype.hasOwnProperty.call(overrides, 'categoryId')
+                ? overrides.categoryId
+                : (Object.prototype.hasOwnProperty.call(overrides, 'category') ? overrides.category : selectedCategory);
+            const finalMinPrice = Object.prototype.hasOwnProperty.call(overrides, 'minPrice')
+                ? overrides.minPrice
+                : minPrice;
+            const finalMaxPrice = Object.prototype.hasOwnProperty.call(overrides, 'maxPrice')
+                ? overrides.maxPrice
+                : maxPrice;
+            const finalSortBy = Object.prototype.hasOwnProperty.call(overrides, 'sortBy')
+                ? overrides.sortBy
+                : sortBy;
 
             const isUsingSearchApi =
-                finalSearchTerm ||
-                selectedCategory ||
-                minPrice !== null ||
-                maxPrice !== null ||
-                onSale ||
-                minViews !== null ||
-                sortBy !== 'newest';
+                (finalSearchTerm && finalSearchTerm !== '') ||
+                (finalCategory && finalCategory !== '') ||
+                finalMinPrice !== null ||
+                finalMaxPrice !== null ||
+                finalSortBy !== 'newest';
 
+            let response;
             if (isUsingSearchApi) {
                 response = await searchProductsApi({
-                    search: searchTerm,
-                    category: selectedCategory,
-                    minPrice,
-                    maxPrice,
-                    onSale,
-                    minViews,
-                    sortBy,
+                    search: finalSearchTerm,
+                    categoryId: finalCategory,
+                    minPrice: finalMinPrice,
+                    maxPrice: finalMaxPrice,
+                    sortBy: finalSortBy,
                     page,
                     limit: 12
                 });
@@ -126,7 +137,6 @@ const ProductsPage = () => {
         }
     };
 
-
     const handleLoadMore = () => {
         if (!loadingMore && hasMore) {
             fetchProducts(currentPage + 1, false);
@@ -136,23 +146,26 @@ const ProductsPage = () => {
     const handleSearch = (value) => {
         setSearchTerm(value);
         setCurrentPage(1);
-        fetchProducts(1, true, value);
+        fetchProducts(1, true, { searchTerm: value });
     };
 
-
     const handleCategoryChange = (value) => {
-        setSelectedCategory(value || '');
-        setSearchTerm('');
+        const nextCategory = value || '';
+        setSelectedCategory(nextCategory);
         setCurrentPage(1);
-        fetchProducts(1, true);
+        fetchProducts(1, true, { categoryId: nextCategory });
     };
 
     const handleSortChange = (value) => {
         setSortBy(value);
         setCurrentPage(1);
-        fetchProducts(1, true);
+        fetchProducts(1, true, { sortBy: value });
     };
 
+    const handleApplyFilter = () => {
+        setCurrentPage(1);
+        fetchProducts(1, true, { minPrice, maxPrice });
+    };
 
     const handleViewDetail = (product) => {
         navigate(`/product/${product._id}`);
@@ -254,7 +267,6 @@ const ProductsPage = () => {
                                 <Option value="newest">Mới nhất</Option>
                                 <Option value="price-low">Giá thấp đến cao</Option>
                                 <Option value="price-high">Giá cao đến thấp</Option>
-                                <Option value="rating">Đánh giá cao</Option>
                             </Select>
                         </Col>
 
@@ -268,7 +280,54 @@ const ProductsPage = () => {
                                 Xem theo danh mục
                             </Button>
                         </Col>
+
+                        <Col xs={24} sm={12} md={4}>
+                            <Button
+                                type="default"
+                                size="large"
+                                onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
+                                style={{ width: '100%' }}
+                            >
+                                {showAdvancedFilter ? 'Ẩn bộ lọc' : 'Bộ lọc nâng cao'}
+                            </Button>
+                        </Col>
                     </Row>
+
+                    {/* Advanced Filter */}
+                    {showAdvancedFilter && (
+                        <Row gutter={[16, 16]} style={{ marginTop: '10px' }}>
+                            <Col xs={12} sm={6} md={4}>
+                                <InputNumber
+                                    placeholder="Giá tối thiểu"
+                                    size="large"
+                                    style={{ width: '100%' }}
+                                    value={minPrice}
+                                    onChange={(value) => setMinPrice(value)}
+                                />
+                            </Col>
+
+                            <Col xs={12} sm={6} md={4}>
+                                <InputNumber
+                                    placeholder="Giá tối đa"
+                                    size="large"
+                                    style={{ width: '100%' }}
+                                    value={maxPrice}
+                                    onChange={(value) => setMaxPrice(value)}
+                                />
+                            </Col>
+
+                            <Col xs={24} sm={12} md={4}>
+                                <Button
+                                    type="primary"
+                                    size="large"
+                                    onClick={handleApplyFilter}
+                                    style={{ width: '100%' }}
+                                >
+                                    Lọc
+                                </Button>
+                            </Col>
+                        </Row>
+                    )}
                 </div>
 
                 {/* Products Grid */}

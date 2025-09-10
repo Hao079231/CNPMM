@@ -1,5 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
+const { reindexProducts } = require('../config/elasticsearch');
 
 const dbState = [
     { value: 0, label: 'disconnected' },
@@ -12,6 +13,9 @@ const connection = async () => {
     await mongoose.connect(process.env.MONGO_DB_URL);
     const state = Number(mongoose.connection.readyState);
     console.log(dbState.find(f => f.value === state).label, 'to database');
+
+    // ✅ Gọi hàm reindexProducts sau khi kết nối thành công
+    // await reindexProducts();
 };
 
 module.exports = connection;

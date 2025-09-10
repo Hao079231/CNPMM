@@ -34,15 +34,15 @@ const createProduct = async (req, res) => {
 };
 
 const searchProducts = async (req, res) => {
-    const { search, category, minPrice, maxPrice, onSale, minViews, page = 1, limit = 12 } = req.query;
+    const { search, minPrice, maxPrice, sortBy, page = 1, limit = 12 } = req.query;
+    const categoryId = req.query.categoryId || req.query.category || null;
 
     const data = await searchProductsService({
         search,
-        category,
+        categoryId,
+        sortBy,
         minPrice: minPrice ? parseFloat(minPrice) : null,
         maxPrice: maxPrice ? parseFloat(maxPrice) : null,
-        onSale: onSale === 'true',
-        minViews: minViews ? parseInt(minViews) : null,
         page: parseInt(page),
         limit: parseInt(limit)
     });
