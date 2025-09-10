@@ -6,13 +6,11 @@ const getProductsByCategoryService = async (categoryId, page = 1, limit = 12) =>
     try {
         const skip = (page - 1) * limit;
 
-        // Kiểm tra category có tồn tại không
         const category = await Category.findById(categoryId);
         if (!category) {
             return { EC: 1, EM: 'Category not found' };
         }
 
-        // Lấy products với pagination
         const products = await Product.find({
             category: categoryId,
             isActive: true
@@ -22,7 +20,6 @@ const getProductsByCategoryService = async (categoryId, page = 1, limit = 12) =>
             .skip(skip)
             .limit(limit);
 
-        // Đếm tổng số products
         const totalProducts = await Product.countDocuments({
             category: categoryId,
             isActive: true
@@ -50,15 +47,10 @@ const getProductsByCategoryService = async (categoryId, page = 1, limit = 12) =>
     }
 };
 
-const getAllProductsService = async (page = 1, limit = 12, search = '') => {
+const getAllProductsService = async (page = 1, limit = 12) => {
     try {
         const skip = (page - 1) * limit;
         let query = { isActive: true };
-
-        // Thêm tìm kiếm theo tên sản phẩm
-        if (search) {
-            query.name = { $regex: search, $options: 'i' };
-        }
 
         const products = await Product.find(query)
             .populate('category', 'name')
@@ -104,9 +96,9 @@ const getProductByIdService = async (productId) => {
 
 const createProductService = async (productData) => {
     try {
-        const { name, description, price, originalPrice, images, category, stock, tags } = productData;
+        const { name, description, price, originalPrice, images, categoryId, stock, tags } = productData;
 
-        const categoryExists = await Category.findById(category);
+        const categoryExists = await Category.findById(categoryId);
         if (!categoryExists) {
             return { EC: 1, EM: 'Category not found' };
         }
@@ -117,14 +109,14 @@ const createProductService = async (productData) => {
             price,
             originalPrice,
             images,
-            category,
+            category: categoryExists,
             stock,
             tags
         });
 
         await product.populate('category', 'name');
 
-        // Index vào Elasticsearch
+        // ✅ Index vào Elasticsearch với categoryId
         await esClient.index({
             index: 'products',
             id: product._id.toString(),
@@ -133,7 +125,7 @@ const createProductService = async (productData) => {
                 description: product.description,
                 price: product.price,
                 originalPrice: product.originalPrice,
-                category: product.category._id,
+                categoryId: product.category._id.toString(),
                 categoryName: product.category.name,
                 stock: product.stock,
                 tags: product.tags,
@@ -151,7 +143,7 @@ const createProductService = async (productData) => {
     }
 };
 
-const searchProductsService = async ({ search, category, minPrice, maxPrice, onSale, minViews, sortBy, page = 1, limit = 12 }) => {
+const searchProductsService = async ({ search, categoryId, minPrice, maxPrice, sortBy, page = 1, limit = 12 }) => {
     try {
         const skip = (page - 1) * limit;
         let mustQuery = [];
@@ -159,16 +151,18 @@ const searchProductsService = async ({ search, category, minPrice, maxPrice, onS
 
         if (search) {
             mustQuery.push({
-                multi_match: {
-                    query: search,
-                    fields: ['name^3', 'description'],
-                    fuzziness: 'AUTO'
+                match: {
+                    name: {
+                        query: search,
+                        fuzziness: 'AUTO'
+                    }
                 }
             });
         }
 
-        if (category) {
-            filterQuery.push({ term: { category: category } });
+        // ✅ Filter theo categoryId
+        if (categoryId) {
+            filterQuery.push({ term: { categoryId: categoryId } });
         }
 
         if (minPrice || maxPrice) {
@@ -176,18 +170,6 @@ const searchProductsService = async ({ search, category, minPrice, maxPrice, onS
             if (minPrice) range.gte = minPrice;
             if (maxPrice) range.lte = maxPrice;
             filterQuery.push({ range: { price: range } });
-        }
-
-        if (onSale) {
-            filterQuery.push({
-                script: {
-                    script: "doc['originalPrice'].value > doc['price'].value"
-                }
-            });
-        }
-
-        if (minViews) {
-            filterQuery.push({ range: { views: { gte: minViews } } });
         }
 
         let sortQuery = [];
@@ -198,11 +180,11 @@ const searchProductsService = async ({ search, category, minPrice, maxPrice, onS
             case 'price-high':
                 sortQuery.push({ price: { order: 'desc' } });
                 break;
-            case 'rating':
-                sortQuery.push({ rating: { order: 'desc' } });
+            case 'newest':
+                sortQuery.push({ createdAt: { order: 'desc' } });
                 break;
             default:
-                sortQuery.push({ createdAt: { order: 'desc' } });
+                sortQuery.push({ createdAt: { order: 'asc' } });
         }
 
         const result = await esClient.search({
@@ -243,8 +225,6 @@ const searchProductsService = async ({ search, category, minPrice, maxPrice, onS
     }
 };
 
-
-
 module.exports = {
     getProductsByCategoryService,
     getAllProductsService,
@@ -252,4 +232,3 @@ module.exports = {
     createProductService,
     searchProductsService
 };
-

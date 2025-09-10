@@ -29,9 +29,12 @@ const getCategoryByIdApi = (categoryId) => {
 }
 
 // Product APIs
-const getAllProductsApi = (page = 1, limit = 12, search = '') => {
+const getAllProductsApi = (page = 1, limit = 12) => {
     return axios.get(config.API_ENDPOINTS.PRODUCTS, {
-        params: { page, limit, search }
+        params: {
+            page,
+            limit
+        }
     });
 }
 
@@ -45,31 +48,22 @@ const getProductsByCategoryApi = (categoryId, page = 1, limit = 12) => {
     });
 }
 
-const searchProductsApi = ({
-    search = '',
-    category = '',
-    minPrice = null,
-    maxPrice = null,
-    onSale = false,
-    minViews = null,
-    sortBy = 'newest',
-    page = 1,
-    limit = 12
-} = {}) => {
-    return axios.get(config.API_ENDPOINTS.SEARCH_PRODUCTS, {
-        params: {
-            search,
-            category,
-            minPrice,
-            maxPrice,
-            onSale,
-            minViews,
-            sortBy,
-            page,
-            limit
-        }
+const searchProductsApi = async (params) => {
+    const query = {
+        search: params.search && params.search.trim() !== '' ? params.search.trim() : undefined,
+        categoryId: params.categoryId || params.category || undefined,
+        minPrice: params.minPrice != null ? params.minPrice : undefined,
+        maxPrice: params.maxPrice != null ? params.maxPrice : undefined,
+        sortBy: params.sortBy || undefined,
+        page: params.page || 1,
+        limit: params.limit || 12,
+    };
+
+    return axios.get(`${config.BACKEND_URL}${config.API_ENDPOINTS.PRODUCTS}/search`, {
+        params: query,
     });
 };
+
 
 export {
     createUserApi,
