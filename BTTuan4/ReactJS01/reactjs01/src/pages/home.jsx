@@ -1,9 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Card, Row, Col, Typography, Button, Spin, Alert, Space } from 'antd';
-import { 
-    UserOutlined, 
-    MailOutlined, 
-    HomeOutlined, 
+import {
+    UserOutlined,
+    MailOutlined,
+    HomeOutlined,
     AppstoreOutlined,
     ShoppingOutlined,
     StarOutlined
@@ -19,7 +19,7 @@ const { Title, Text } = Typography;
 const HomePage = () => {
     const { auth } = useContext(AuthContext);
     const navigate = useNavigate();
-    
+
     const [categories, setCategories] = useState([]);
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -84,42 +84,42 @@ const HomePage = () => {
     }
 
     return (
-        <div style={{ padding: '20px' }}>
+        <div>
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 {/* Welcome Section */}
                 <Row justify="center">
                     <Col xs={24} md={16} lg={12}>
-                        <Card>
-                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                <HomeOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
+                        <Card className="surface elevated">
+                            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                                <HomeOutlined style={{ fontSize: 48, color: 'var(--color-primary)' }} />
                                 <Title level={2}>Chào mừng đến với cửa hàng của chúng tôi</Title>
                             </div>
-                            
+
                             {auth.isAuthenticated ? (
                                 <div>
-                                    <Card 
-                                        title="Thông tin người dùng" 
-                                        style={{ marginBottom: '20px' }}
+                                    <Card
+                                        title="Thông tin người dùng"
+                                        style={{ marginBottom: 20 }}
                                         extra={<Button type="primary" onClick={() => navigate('/user')}>Xem người dùng</Button>}
                                     >
                                         <Row gutter={16}>
                                             <Col span={12}>
-                                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                                                    <UserOutlined style={{ marginRight: '8px' }} />
+                                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+                                                    <UserOutlined style={{ marginRight: 8 }} />
                                                     <Text strong>Tên: </Text>
-                                                    <Text style={{ marginLeft: '8px' }}>{auth.user.name}</Text>
+                                                    <Text style={{ marginLeft: 8 }}>{auth.user.name}</Text>
                                                 </div>
                                             </Col>
                                             <Col span={12}>
-                                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                                                    <MailOutlined style={{ marginRight: '8px' }} />
+                                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+                                                    <MailOutlined style={{ marginRight: 8 }} />
                                                     <Text strong>Email: </Text>
-                                                    <Text style={{ marginLeft: '8px' }}>{auth.user.email}</Text>
+                                                    <Text style={{ marginLeft: 8 }}>{auth.user.email}</Text>
                                                 </div>
                                             </Col>
                                         </Row>
                                     </Card>
-                                    
+
                                     <div style={{ textAlign: 'center' }}>
                                         <Text type="secondary">
                                             Bạn đã đăng nhập thành công. Bây giờ bạn có thể truy cập tất cả tính năng của ứng dụng.
@@ -128,13 +128,13 @@ const HomePage = () => {
                                 </div>
                             ) : (
                                 <div style={{ textAlign: 'center' }}>
-                                    <Text type="secondary" style={{ fontSize: '16px', marginBottom: '20px', display: 'block' }}>
+                                    <Text type="secondary" style={{ fontSize: 16, marginBottom: 20, display: 'block' }}>
                                         Vui lòng đăng nhập để truy cập các tính năng của ứng dụng
                                     </Text>
                                     <Button type="primary" size="large" onClick={() => navigate('/login')}>
                                         Đăng nhập
                                     </Button>
-                                    <Button size="large" style={{ marginLeft: '10px' }} onClick={() => navigate('/register')}>
+                                    <Button size="large" style={{ marginLeft: 10 }} onClick={() => navigate('/register')}>
                                         Đăng ký
                                     </Button>
                                 </div>
@@ -146,7 +146,7 @@ const HomePage = () => {
                 {/* Categories Section */}
                 {categories.length > 0 && (
                     <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <div className="section-title" style={{ justifyContent: 'space-between', marginBottom: 20 }}>
                             <Title level={3} style={{ margin: 0 }}>
                                 <AppstoreOutlined /> Danh mục sản phẩm
                             </Title>
@@ -154,7 +154,7 @@ const HomePage = () => {
                                 Xem tất cả
                             </Button>
                         </div>
-                        
+
                         <Row gutter={[24, 24]}>
                             {categories.map((category) => (
                                 <Col key={category._id} xs={24} sm={12} md={6} lg={6} xl={6}>
@@ -168,7 +168,7 @@ const HomePage = () => {
                 {/* Featured Products Section */}
                 {featuredProducts.length > 0 && (
                     <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <div className="section-title" style={{ justifyContent: 'space-between', marginBottom: 20 }}>
                             <Title level={3} style={{ margin: 0 }}>
                                 <StarOutlined /> Sản phẩm nổi bật
                             </Title>
@@ -176,7 +176,7 @@ const HomePage = () => {
                                 Xem tất cả
                             </Button>
                         </div>
-                        
+
                         <Row gutter={[24, 24]}>
                             {featuredProducts.map((product) => (
                                 <Col key={product._id} xs={24} sm={12} md={8} lg={6} xl={6}>

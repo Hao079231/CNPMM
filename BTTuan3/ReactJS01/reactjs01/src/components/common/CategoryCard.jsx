@@ -14,6 +14,7 @@ const CategoryCard = ({ category }) => {
     return (
         <Card
             hoverable
+            style={{ border: '1px solid #f0f0f0', borderRadius: 10 }}
             cover={
                 <Image
                     alt={category.name}
@@ -32,10 +33,10 @@ const CategoryCard = ({ category }) => {
                     </Title>
                 }
                 description={
-                    <Text 
-                        type="secondary" 
-                        style={{ 
-                            textAlign: 'center', 
+                    <Text
+                        type="secondary"
+                        style={{
+                            textAlign: 'center',
                             display: 'block',
                             marginTop: '8px'
                         }}

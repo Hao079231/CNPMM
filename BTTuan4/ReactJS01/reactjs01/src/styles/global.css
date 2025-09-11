@@ -1,4 +1,154 @@
+/* Design tokens */
+:root {
+  --color-bg: #e7f1ff;
+  /* light sky */
+  --color-surface: #f0f7ff;
+  /* pale blue surface */
+  --color-surface-2: #e8f3ff;
+  --color-text: #0b2545;
+  /* deep navy text */
+  --color-text-muted: #45637a;
+  /* muted slate */
+  --color-primary: #2e6bff;
+  --color-primary-strong: #1f57ea;
+  --color-accent: #08b8d8;
+  --color-danger: #e25555;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-1: 0 6px 20px rgba(15, 37, 64, 0.12);
+  --shadow-2: 0 10px 32px rgba(15, 37, 64, 0.18);
+  --container-max: 1200px;
+}
+
+/* Base reset */
 * {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
   margin: 0;
   padding: 0;
+  background: radial-gradient(1000px 600px at 10% -10%, rgba(46, 107, 255, 0.12), transparent),
+    radial-gradient(800px 500px at 100% 10%, rgba(8, 184, 216, 0.10), transparent),
+    var(--color-bg);
+  color: var(--color-text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  line-height: 1.5;
+}
+
+/* Utilities */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.surface {
+  background: linear-gradient(180deg, var(--color-surface), var(--color-surface-2));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+}
+
+.elevated {
+  box-shadow: var(--shadow-2);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+/* Ant Design theming overrides (lightweight, purely visual) */
+.ant-layout {
+  background: transparent;
+}
+
+.ant-layout-header {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid rgba(15, 37, 64, 0.08);
+}
+
+/* Light menu */
+.ant-menu-light.ant-menu-horizontal {
+  background: transparent;
+}
+
+.ant-menu-light .ant-menu-item,
+.ant-menu-light .ant-menu-submenu-title {
+  color: var(--color-text-muted);
+}
+
+.ant-menu-light .ant-menu-item:hover,
+.ant-menu-light .ant-menu-submenu-title:hover {
+  color: var(--color-text);
+}
+
+.ant-menu-light.ant-menu-horizontal>.ant-menu-item-selected {
+  background: rgba(46, 107, 255, 0.12);
+}
+
+/* Ant cards */
+.ant-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(240, 247, 255, 0.95));
+  border: 1px solid rgba(15, 37, 64, 0.08);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.ant-card .ant-card-meta-title {
+  color: var(--color-text);
+}
+
+.ant-card .ant-card-meta-description {
+  color: var(--color-text-muted);
+}
+
+/* Buttons */
+.ant-btn-primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.ant-btn-primary:hover {
+  background: var(--color-primary-strong);
+  border-color: var(--color-primary-strong);
+}
+
+.ant-btn-link {
+  color: var(--color-accent);
+}
+
+/* Inputs */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-input-number,
+.ant-input-number-input {
+  background: rgba(255, 255, 255, 0.8) !important;
+  color: var(--color-text) !important;
+  border-color: rgba(15, 37, 64, 0.15) !important;
+}
+
+.ant-breadcrumb {
+  color: var(--color-text-muted);
+}
+
+/* Helper spacing for pages */
+.page {
+  padding: 24px;
+}
+
+.page .grid-gap-24 {
+  row-gap: 24px;
 }

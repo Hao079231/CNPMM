@@ -22,6 +22,7 @@ const ProductCard = ({ product, onViewDetail, onAddToCart }) => {
     return (
         <Card
             hoverable
+            style={{ border: '1px solid #f0f0f0', borderRadius: 10 }}
             cover={
                 <div style={{ position: 'relative' }}>
                     <Image
@@ -31,11 +32,11 @@ const ProductCard = ({ product, onViewDetail, onAddToCart }) => {
                         preview={false}
                     />
                     {discount > 0 && (
-                        <Tag 
-                            color="red" 
-                            style={{ 
-                                position: 'absolute', 
-                                top: 8, 
+                        <Tag
+                            color="#ff4d4f"
+                            style={{
+                                position: 'absolute',
+                                top: 8,
                                 left: 8,
                                 margin: 0
                             }}
@@ -50,7 +51,7 @@ const ProductCard = ({ product, onViewDetail, onAddToCart }) => {
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            backgroundColor: 'rgba(0,0,0,0.5)',
+                            backgroundColor: 'rgba(0,0,0,0.35)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -64,17 +65,17 @@ const ProductCard = ({ product, onViewDetail, onAddToCart }) => {
                 </div>
             }
             actions={[
-                <Button 
-                    type="primary" 
-                    icon={<EyeOutlined />} 
+                <Button
+                    type="primary"
+                    icon={<EyeOutlined />}
                     onClick={() => onViewDetail(product)}
                     block
                 >
                     Xem chi tiết
                 </Button>,
-                <Button 
-                    type="default" 
-                    icon={<ShoppingCartOutlined />} 
+                <Button
+                    type="default"
+                    icon={<ShoppingCartOutlined />}
                     onClick={() => onAddToCart(product)}
                     disabled={product.stock === 0}
                     block
@@ -87,7 +88,7 @@ const ProductCard = ({ product, onViewDetail, onAddToCart }) => {
                 <Title level={5} style={{ margin: 0, minHeight: 40 }}>
                     {product.name}
                 </Title>
-                
+
                 <Space direction="vertical" size="small" style={{ width: '100%' }}>
                     <Space>
                         <Text strong style={{ fontSize: '16px', color: '#ff4d4f' }}>
@@ -99,7 +100,7 @@ const ProductCard = ({ product, onViewDetail, onAddToCart }) => {
                             </Text>
                         )}
                     </Space>
-                    
+
                     {product.rating > 0 && (
                         <Space>
                             <Text style={{ fontSize: '12px' }}>
@@ -107,11 +108,11 @@ const ProductCard = ({ product, onViewDetail, onAddToCart }) => {
                             </Text>
                         </Space>
                     )}
-                    
+
                     <Text type="secondary" style={{ fontSize: '12px' }}>
                         Còn lại: {product.stock} sản phẩm
                     </Text>
-                    
+
                     {product.tags && product.tags.length > 0 && (
                         <Space wrap>
                             {product.tags.slice(0, 2).map((tag, index) => (

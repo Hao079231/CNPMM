@@ -45,13 +45,40 @@ const getProductsByCategoryApi = (categoryId, page = 1, limit = 12) => {
     });
 }
 
+const searchProductsApi = ({
+    search = '',
+    category = '',
+    minPrice = null,
+    maxPrice = null,
+    onSale = false,
+    minViews = null,
+    sortBy = 'newest',
+    page = 1,
+    limit = 12
+} = {}) => {
+    return axios.get(config.API_ENDPOINTS.SEARCH_PRODUCTS, {
+        params: {
+            search,
+            category,
+            minPrice,
+            maxPrice,
+            onSale,
+            minViews,
+            sortBy,
+            page,
+            limit
+        }
+    });
+};
+
 export {
-    createUserApi, 
-    loginApi, 
+    createUserApi,
+    loginApi,
     getUserApi,
     getAllCategoriesApi,
     getCategoryByIdApi,
     getAllProductsApi,
     getProductByIdApi,
-    getProductsByCategoryApi
+    getProductsByCategoryApi,
+    searchProductsApi
 }

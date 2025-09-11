@@ -25,11 +25,11 @@ function App() {
           <Spin />
         </div>
       ) : (
-        <Layout>
-          <Header>
+        <Layout style={{ minHeight: '100vh', background: '#f5f7fb' }}>
+          <Header style={{ background: '#ffffff', padding: 0, borderBottom: '1px solid #f0f0f0' }}>
             <AppHeader />
           </Header>
-          <Content>
+          <Content style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 16px', width: '100%' }}>
             <Outlet />
           </Content>
         </Layout>

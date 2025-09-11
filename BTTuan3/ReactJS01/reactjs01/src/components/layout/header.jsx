@@ -23,7 +23,15 @@ const Header = () => {
     };
 
     return (
-        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['home']}>
+        <Menu
+            theme="light"
+            mode="horizontal"
+            defaultSelectedKeys={['home']}
+            style={{
+                background: '#ffffff',
+                borderBottom: '1px solid #f0f0f0'
+            }}
+        >
             <Item key="home" icon={<HomeOutlined />}>
                 <Link to="/">Trang chủ</Link>
             </Item>

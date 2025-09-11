@@ -4,7 +4,7 @@ import AppHeader from './components/layout/header.jsx';
 import { AuthContext } from './components/context/auth.context';
 import { Outlet } from 'react-router-dom';
 
-const { Header, Content } = Layout;
+const { Header, Content, Footer } = Layout;
 
 function App() {
   const { appLoading } = useContext(AuthContext);
@@ -26,12 +26,22 @@ function App() {
         </div>
       ) : (
         <Layout>
-          <Header>
-            <AppHeader />
+          <Header style={{ position: 'sticky', top: 0, zIndex: 100, width: '100%' }}>
+            <div className="container">
+              <AppHeader />
+            </div>
           </Header>
           <Content>
-            <Outlet />
+            <div className="container page">
+              <Outlet />
+            </div>
           </Content>
+          <Footer style={{ background: 'transparent', color: 'var(--color-text-muted)' }}>
+            <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, paddingBottom: 8 }}>
+              <span>© {new Date().getFullYear()} MyShop. All rights reserved.</span>
+              <span style={{ opacity: 0.8 }}>Built with React & Ant Design</span>
+            </div>
+          </Footer>
         </Layout>
       )}
     </>

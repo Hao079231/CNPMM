@@ -14,36 +14,29 @@ const CategoryCard = ({ category }) => {
     return (
         <Card
             hoverable
+            className="elevated"
             cover={
-                <Image
-                    alt={category.name}
-                    src={category.image || 'https://via.placeholder.com/300x200?text=Category'}
-                    style={{ height: 150, objectFit: 'cover' }}
-                    preview={false}
-                />
+                <div style={{ position: 'relative' }}>
+                    <Image
+                        alt={category.name}
+                        src={category.image || 'https://via.placeholder.com/600x360?text=Category'}
+                        style={{ height: 180, objectFit: 'cover' }}
+                        preview={false}
+                    />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(11,18,32,0.7), rgba(11,18,32,0.0) 50%)' }} />
+                </div>
             }
             onClick={handleCategoryClick}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: 'pointer', overflow: 'hidden' }}
         >
-            <Card.Meta
-                title={
-                    <Title level={4} style={{ textAlign: 'center', margin: 0 }}>
-                        {category.name}
-                    </Title>
-                }
-                description={
-                    <Text 
-                        type="secondary" 
-                        style={{ 
-                            textAlign: 'center', 
-                            display: 'block',
-                            marginTop: '8px'
-                        }}
-                    >
+            <div style={{ textAlign: 'center' }}>
+                <Title level={4} style={{ margin: 0 }}>{category.name}</Title>
+                {category.description && (
+                    <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
                         {category.description}
                     </Text>
-                }
-            />
+                )}
+            </div>
         </Card>
     );
 };

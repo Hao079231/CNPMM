@@ -22,22 +22,26 @@ const ProductCard = ({ product, onViewDetail, onAddToCart }) => {
     return (
         <Card
             hoverable
+            className="elevated"
             cover={
                 <div style={{ position: 'relative' }}>
                     <Image
                         alt={product.name}
-                        src={product.images?.[0] || 'https://via.placeholder.com/300x300?text=No+Image'}
-                        style={{ height: 200, objectFit: 'cover' }}
+                        src={product.images?.[0] || 'https://via.placeholder.com/600x400?text=No+Image'}
+                        style={{ height: 220, objectFit: 'cover' }}
                         preview={false}
                     />
                     {discount > 0 && (
-                        <Tag 
-                            color="red" 
-                            style={{ 
-                                position: 'absolute', 
-                                top: 8, 
-                                left: 8,
-                                margin: 0
+                        <Tag
+                            color="#ff4d4f"
+                            style={{
+                                position: 'absolute',
+                                top: 10,
+                                left: 10,
+                                margin: 0,
+                                borderRadius: 6,
+                                padding: '2px 8px',
+                                boxShadow: 'var(--shadow-1)'
                             }}
                         >
                             -{discount}%
@@ -50,12 +54,12 @@ const ProductCard = ({ product, onViewDetail, onAddToCart }) => {
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            backgroundColor: 'rgba(0,0,0,0.5)',
+                            background: 'linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6))',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             color: 'white',
-                            fontSize: '18px',
+                            fontSize: 18,
                             fontWeight: 'bold'
                         }}>
                             Hết hàng
@@ -64,17 +68,17 @@ const ProductCard = ({ product, onViewDetail, onAddToCart }) => {
                 </div>
             }
             actions={[
-                <Button 
-                    type="primary" 
-                    icon={<EyeOutlined />} 
+                <Button
+                    type="primary"
+                    icon={<EyeOutlined />}
                     onClick={() => onViewDetail(product)}
                     block
                 >
                     Xem chi tiết
                 </Button>,
-                <Button 
-                    type="default" 
-                    icon={<ShoppingCartOutlined />} 
+                <Button
+                    type="default"
+                    icon={<ShoppingCartOutlined />}
                     onClick={() => onAddToCart(product)}
                     disabled={product.stock === 0}
                     block
@@ -87,31 +91,31 @@ const ProductCard = ({ product, onViewDetail, onAddToCart }) => {
                 <Title level={5} style={{ margin: 0, minHeight: 40 }}>
                     {product.name}
                 </Title>
-                
+
                 <Space direction="vertical" size="small" style={{ width: '100%' }}>
                     <Space>
-                        <Text strong style={{ fontSize: '16px', color: '#ff4d4f' }}>
+                        <Text strong style={{ fontSize: 16, color: 'var(--color-accent)' }}>
                             {formatPrice(product.price)}
                         </Text>
                         {product.originalPrice && product.originalPrice > product.price && (
-                            <Text delete style={{ fontSize: '14px', color: '#999' }}>
+                            <Text delete style={{ fontSize: 14, color: '#9fb3d1' }}>
                                 {formatPrice(product.originalPrice)}
                             </Text>
                         )}
                     </Space>
-                    
+
                     {product.rating > 0 && (
                         <Space>
-                            <Text style={{ fontSize: '12px' }}>
+                            <Text style={{ fontSize: 12 }}>
                                 ⭐ {product.rating.toFixed(1)} ({product.reviewCount} đánh giá)
                             </Text>
                         </Space>
                     )}
-                    
-                    <Text type="secondary" style={{ fontSize: '12px' }}>
+
+                    <Text type="secondary" style={{ fontSize: 12 }}>
                         Còn lại: {product.stock} sản phẩm
                     </Text>
-                    
+
                     {product.tags && product.tags.length > 0 && (
                         <Space wrap>
                             {product.tags.slice(0, 2).map((tag, index) => (
