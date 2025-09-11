@@ -1,6 +1,6 @@
 import { getUserApi } from '../util/apis';
 import { useEffect, useState } from 'react';
-import { Table, notification, Spin } from 'antd';
+import { Table, notification, Spin, Card, Typography } from 'antd';
 
 const UserPage = () => {
     const [dataSource, setDataSource] = useState([]);
@@ -65,17 +65,21 @@ const UserPage = () => {
 
     return (
         <div style={{ padding: '20px' }}>
-            <h2>User Management</h2>
-            <Table 
-                columns={columns} 
-                dataSource={dataSource} 
-                rowKey={'_id'}
-                pagination={{
-                    pageSize: 10,
-                    showSizeChanger: true,
-                    showQuickJumper: true
-                }}
-            />
+            <Card
+                title={<Typography.Title level={3} style={{ margin: 0 }}>User Management</Typography.Title>}
+                style={{ background: '#ffffff', border: '1px solid #f0f0f0', borderRadius: 8 }}
+            >
+                <Table
+                    columns={columns}
+                    dataSource={dataSource}
+                    rowKey={'_id'}
+                    pagination={{
+                        pageSize: 10,
+                        showSizeChanger: true,
+                        showQuickJumper: true
+                    }}
+                />
+            </Card>
         </div>
     );
 }

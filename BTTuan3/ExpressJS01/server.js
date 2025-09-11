@@ -7,7 +7,7 @@ const connection = require('./src/config/database');
 const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8181;
 
 app.use(cors());
 app.use(express.json());

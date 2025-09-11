@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    Row, 
-    Col, 
-    Typography, 
-    Spin, 
-    Alert, 
-    Space, 
+import {
+    Row,
+    Col,
+    Typography,
+    Spin,
+    Alert,
+    Space,
     Input,
     Select,
     Button,
     Breadcrumb
 } from 'antd';
-import { 
+import {
     SearchOutlined,
     HomeOutlined,
-    AppstoreOutlined,
-    FilterOutlined
+    AppstoreOutlined
 } from '@ant-design/icons';
-import { 
+import {
     getAllProductsApi,
-    getAllCategoriesApi
+    getAllCategoriesApi,
+    searchProductsApi
 } from '../util/apis';
 import ProductCard from '../components/common/ProductCard';
 import LazyLoading from '../components/common/LazyLoading';
@@ -31,7 +31,7 @@ const { Option } = Select;
 
 const ProductsPage = () => {
     const navigate = useNavigate();
-    
+
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -39,9 +39,15 @@ const ProductsPage = () => {
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+
+    // Filters
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [sortBy, setSortBy] = useState('newest');
+    const [minPrice, setMinPrice] = useState(null);
+    const [maxPrice, setMaxPrice] = useState(null);
+    const [onSale, setOnSale] = useState(false);
+    const [minViews, setMinViews] = useState(null);
 
     useEffect(() => {
         fetchCategories();
@@ -59,7 +65,7 @@ const ProductsPage = () => {
         }
     };
 
-    const fetchProducts = async (page = 1, reset = true) => {
+    const fetchProducts = async (page = 1, reset = true, overrideSearchTerm = null) => {
         try {
             if (page === 1) {
                 setLoading(true);
@@ -68,19 +74,46 @@ const ProductsPage = () => {
             }
             setError(null);
 
-            const response = await getAllProductsApi(page, 12, searchTerm);
-            
+            let response;
+
+            const finalSearchTerm = overrideSearchTerm !== null ? overrideSearchTerm : searchTerm;
+
+            const isUsingSearchApi =
+                finalSearchTerm ||
+                selectedCategory ||
+                minPrice !== null ||
+                maxPrice !== null ||
+                onSale ||
+                minViews !== null ||
+                sortBy !== 'newest';
+
+            if (isUsingSearchApi) {
+                response = await searchProductsApi({
+                    search: searchTerm,
+                    category: selectedCategory,
+                    minPrice,
+                    maxPrice,
+                    onSale,
+                    minViews,
+                    sortBy,
+                    page,
+                    limit: 12
+                });
+            } else {
+                response = await getAllProductsApi(page, 12);
+            }
+
             if (response && response.EC === 0) {
                 const { products: newProducts, pagination } = response.DT;
-                
+
                 if (reset) {
                     setProducts(newProducts);
                 } else {
                     setProducts(prev => [...prev, ...newProducts]);
                 }
-                
+
                 setCurrentPage(page);
-                setHasMore(pagination.hasNextPage);
+                setHasMore(pagination?.hasNextPage);
             } else {
                 setError(response?.EM || 'Không thể tải danh sách sản phẩm');
             }
@@ -93,6 +126,7 @@ const ProductsPage = () => {
         }
     };
 
+
     const handleLoadMore = () => {
         if (!loadingMore && hasMore) {
             fetchProducts(currentPage + 1, false);
@@ -102,20 +136,20 @@ const ProductsPage = () => {
     const handleSearch = (value) => {
         setSearchTerm(value);
         setCurrentPage(1);
-        fetchProducts(1, true);
+        fetchProducts(1, true, value);
     };
 
+
     const handleCategoryChange = (value) => {
-        setSelectedCategory(value);
-        if (value) {
-            navigate(`/category/${value}`);
-        }
+        setSelectedCategory(value || '');
+        setCurrentPage(1);
+        fetchProducts(1, true);
     };
 
     const handleSortChange = (value) => {
         setSortBy(value);
-        // TODO: Implement sorting
-        console.log('Sort by:', value);
+        setCurrentPage(1);
+        fetchProducts(1, true);
     };
 
     const handleViewDetail = (product) => {
@@ -123,7 +157,6 @@ const ProductsPage = () => {
     };
 
     const handleAddToCart = (product) => {
-        // TODO: Implement add to cart functionality
         console.log('Add to cart:', product);
     };
 
@@ -154,7 +187,7 @@ const ProductsPage = () => {
     }
 
     return (
-        <div style={{ padding: '20px' }}>
+        <div style={{ padding: '24px' }}>
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 {/* Breadcrumb */}
                 <Breadcrumb
@@ -174,12 +207,12 @@ const ProductsPage = () => {
 
                 {/* Header */}
                 <div>
-                    <Title level={2} style={{ margin: 0, marginBottom: '20px' }}>
+                    <Title level={2} style={{ margin: 0, marginBottom: '8px' }}>
                         Tất cả sản phẩm
                     </Title>
-                    
+
                     {/* Filters */}
-                    <Row gutter={[16, 16]} align="middle">
+                    <Row gutter={[16, 16]} align="middle" style={{ marginBottom: 8 }}>
                         <Col xs={24} sm={12} md={8}>
                             <Search
                                 placeholder="Tìm kiếm sản phẩm..."
@@ -190,13 +223,13 @@ const ProductsPage = () => {
                                 style={{ width: '100%' }}
                             />
                         </Col>
-                        
+
                         <Col xs={12} sm={6} md={4}>
                             <Select
                                 placeholder="Danh mục"
                                 size="large"
                                 style={{ width: '100%' }}
-                                value={selectedCategory}
+                                value={selectedCategory || undefined}
                                 onChange={handleCategoryChange}
                                 allowClear
                             >
@@ -207,7 +240,7 @@ const ProductsPage = () => {
                                 ))}
                             </Select>
                         </Col>
-                        
+
                         <Col xs={12} sm={6} md={4}>
                             <Select
                                 placeholder="Sắp xếp"
@@ -222,10 +255,10 @@ const ProductsPage = () => {
                                 <Option value="rating">Đánh giá cao</Option>
                             </Select>
                         </Col>
-                        
+
                         <Col xs={24} sm={12} md={8}>
-                            <Button 
-                                icon={<AppstoreOutlined />} 
+                            <Button
+                                icon={<AppstoreOutlined />}
                                 size="large"
                                 onClick={() => navigate('/categories')}
                                 style={{ width: '100%' }}
@@ -245,12 +278,12 @@ const ProductsPage = () => {
                 >
                     <Row gutter={[24, 24]}>
                         {products.map((product) => (
-                            <Col 
-                                key={product._id} 
-                                xs={24} 
-                                sm={12} 
-                                md={8} 
-                                lg={6} 
+                            <Col
+                                key={product._id}
+                                xs={24}
+                                sm={12}
+                                md={8}
+                                lg={6}
                                 xl={6}
                             >
                                 <ProductCard
@@ -279,4 +312,3 @@ const ProductsPage = () => {
 };
 
 export default ProductsPage;
-

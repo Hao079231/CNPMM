@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Button, Col, Divider, Form, Input, notification, Row } from 'antd';
+import { Button, Col, Divider, Form, Input, notification, Row, Card, Typography } from 'antd';
 import { loginApi } from '../util/apis';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { AuthContext } from '../components/context/auth.context';
@@ -50,22 +50,19 @@ const LoginPage = () => {
     };
 
     return (
-        <Form name="basic" onFinish={onFinish} autoComplete="off" layout="vertical">
-            <Row justify={"center"} style={{ marginTop: "30px" }}>
-                <Col xs={24} md={16} lg={8}>
-                    <fieldset style={{
-                        padding: "15px",
-                        margin: "5px",
-                        border: "1px solid #ccc",
-                        borderRadius: "5px"
-                    }}>
-                        <legend>Đăng nhập</legend>
+        <Row justify={"center"} style={{ padding: "40px 16px" }}>
+            <Col xs={24} sm={20} md={14} lg={10} xl={8}>
+                <Card
+                    title={<Typography.Title level={3} style={{ margin: 0 }}>Đăng nhập</Typography.Title>}
+                    style={{ background: '#ffffff', border: '1px solid #f0f0f0', borderRadius: 8 }}
+                >
+                    <Form name="basic" onFinish={onFinish} autoComplete="off" layout="vertical">
                         <Form.Item
                             label="Email"
                             name="email"
                             rules={[{ required: true, message: 'Please input your email!' }]}
                         >
-                            <Input />
+                            <Input size="large" placeholder="you@example.com" />
                         </Form.Item>
 
                         <Form.Item
@@ -73,23 +70,23 @@ const LoginPage = () => {
                             name="password"
                             rules={[{ required: true, message: 'Please input your password!' }]}
                         >
-                            <Input.Password />
+                            <Input.Password size="large" placeholder="••••••••" />
                         </Form.Item>
 
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" loading={loading}>
+                            <Button type="primary" htmlType="submit" loading={loading} block size="large">
                                 Login
                             </Button>
                         </Form.Item>
 
-                        <Divider orientation='center'>Or</Divider>
+                        <Divider plain>Hoặc</Divider>
                         <div style={{ textAlign: "center" }}>
-                            <span>Bạn chưa có tài khoản? <Link to="/register">Register</Link></span>
+                            <span>Bạn chưa có tài khoản? <Link to="/register">Đăng ký</Link></span>
                         </div>
-                    </fieldset>
-                </Col>
-            </Row>
-        </Form>
+                    </Form>
+                </Card>
+            </Col>
+        </Row>
     );
 };
 

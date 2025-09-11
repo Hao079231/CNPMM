@@ -11,7 +11,8 @@ export const config = {
         ACCOUNT: '/v1/api/account',
         CATEGORIES: '/v1/api/categories',
         PRODUCTS: '/v1/api/products',
-        CATEGORY_PRODUCTS: '/v1/api/categories'
+        CATEGORY_PRODUCTS: '/v1/api/categories',
+        SEARCH_PRODUCTS: '/v1/api/products/search'
     },
 
     // Local storage keys

@@ -19,7 +19,7 @@ const CategoriesPage = () => {
             setLoading(true);
             setError(null);
             const response = await getAllCategoriesApi();
-            
+
             if (response && response.EC === 0) {
                 setCategories(response.DT || []);
             } else {
@@ -55,27 +55,27 @@ const CategoriesPage = () => {
     }
 
     return (
-        <div style={{ padding: '20px' }}>
+        <div>
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 <Title level={2} style={{ textAlign: 'center' }}>
                     Danh mục sản phẩm
                 </Title>
-                
+
                 <Row gutter={[24, 24]}>
                     {categories.map((category) => (
-                        <Col 
-                            key={category._id} 
-                            xs={24} 
-                            sm={12} 
-                            md={8} 
-                            lg={6} 
+                        <Col
+                            key={category._id}
+                            xs={24}
+                            sm={12}
+                            md={8}
+                            lg={6}
                             xl={6}
                         >
                             <CategoryCard category={category} />
                         </Col>
                     ))}
                 </Row>
-                
+
                 {categories.length === 0 && (
                     <div style={{ textAlign: 'center', padding: '50px' }}>
                         <Title level={4} type="secondary">

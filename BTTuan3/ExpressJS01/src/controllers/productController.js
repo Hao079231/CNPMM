@@ -1,21 +1,22 @@
-const { 
-    getProductsByCategoryService, 
-    getAllProductsService, 
-    getProductByIdService, 
-    createProductService 
+const {
+    getProductsByCategoryService,
+    getAllProductsService,
+    getProductByIdService,
+    createProductService,
+    searchProductsService
 } = require('../services/productService');
 
 const getProductsByCategory = async (req, res) => {
     const { categoryId } = req.params;
     const { page = 1, limit = 12 } = req.query;
-    
+
     const data = await getProductsByCategoryService(categoryId, parseInt(page), parseInt(limit));
     return res.status(200).json(data);
 };
 
 const getAllProducts = async (req, res) => {
     const { page = 1, limit = 12, search = '' } = req.query;
-    
+
     const data = await getAllProductsService(parseInt(page), parseInt(limit), search);
     return res.status(200).json(data);
 };
@@ -32,10 +33,28 @@ const createProduct = async (req, res) => {
     return res.status(200).json(data);
 };
 
+const searchProducts = async (req, res) => {
+    const { search, category, minPrice, maxPrice, onSale, minViews, page = 1, limit = 12 } = req.query;
+
+    const data = await searchProductsService({
+        search,
+        category,
+        minPrice: minPrice ? parseFloat(minPrice) : null,
+        maxPrice: maxPrice ? parseFloat(maxPrice) : null,
+        onSale: onSale === 'true',
+        minViews: minViews ? parseInt(minViews) : null,
+        page: parseInt(page),
+        limit: parseInt(limit)
+    });
+
+    return res.status(200).json(data);
+};
+
 module.exports = {
     getProductsByCategory,
     getAllProducts,
     getProductById,
-    createProduct
+    createProduct,
+    searchProducts
 };
 

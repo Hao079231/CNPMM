@@ -1,9 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Card, Row, Col, Typography, Button, Spin, Alert, Space } from 'antd';
-import { 
-    UserOutlined, 
-    MailOutlined, 
-    HomeOutlined, 
+import {
+    UserOutlined,
+    MailOutlined,
+    HomeOutlined,
     AppstoreOutlined,
     ShoppingOutlined,
     StarOutlined
@@ -19,7 +19,7 @@ const { Title, Text } = Typography;
 const HomePage = () => {
     const { auth } = useContext(AuthContext);
     const navigate = useNavigate();
-    
+
     const [categories, setCategories] = useState([]);
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -84,21 +84,21 @@ const HomePage = () => {
     }
 
     return (
-        <div style={{ padding: '20px' }}>
+        <div style={{ padding: '24px' }}>
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 {/* Welcome Section */}
                 <Row justify="center">
-                    <Col xs={24} md={16} lg={12}>
-                        <Card>
+                    <Col xs={24} md={18} lg={14}>
+                        <Card style={{ border: '1px solid #f0f0f0', borderRadius: 10 }}>
                             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                                 <HomeOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
                                 <Title level={2}>Chào mừng đến với cửa hàng của chúng tôi</Title>
                             </div>
-                            
+
                             {auth.isAuthenticated ? (
                                 <div>
-                                    <Card 
-                                        title="Thông tin người dùng" 
+                                    <Card
+                                        title="Thông tin người dùng"
                                         style={{ marginBottom: '20px' }}
                                         extra={<Button type="primary" onClick={() => navigate('/user')}>Xem người dùng</Button>}
                                     >
@@ -119,7 +119,7 @@ const HomePage = () => {
                                             </Col>
                                         </Row>
                                     </Card>
-                                    
+
                                     <div style={{ textAlign: 'center' }}>
                                         <Text type="secondary">
                                             Bạn đã đăng nhập thành công. Bây giờ bạn có thể truy cập tất cả tính năng của ứng dụng.
@@ -154,7 +154,7 @@ const HomePage = () => {
                                 Xem tất cả
                             </Button>
                         </div>
-                        
+
                         <Row gutter={[24, 24]}>
                             {categories.map((category) => (
                                 <Col key={category._id} xs={24} sm={12} md={6} lg={6} xl={6}>
@@ -176,7 +176,7 @@ const HomePage = () => {
                                 Xem tất cả
                             </Button>
                         </div>
-                        
+
                         <Row gutter={[24, 24]}>
                             {featuredProducts.map((product) => (
                                 <Col key={product._id} xs={24} sm={12} md={8} lg={6} xl={6}>

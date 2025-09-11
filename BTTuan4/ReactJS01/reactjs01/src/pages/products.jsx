@@ -202,7 +202,7 @@ const ProductsPage = () => {
     }
 
     return (
-        <div style={{ padding: '20px' }}>
+        <div>
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 {/* Breadcrumb */}
                 <Breadcrumb

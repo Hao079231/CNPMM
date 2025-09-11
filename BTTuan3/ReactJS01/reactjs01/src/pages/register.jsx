@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Col, Form, Input, Row, notification } from 'antd';
+import { Button, Col, Form, Input, Row, notification, Card, Typography, Divider } from 'antd';
 import { createUserApi } from '../util/apis';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeftOutlined } from '@ant-design/icons';
@@ -37,22 +37,19 @@ const RegisterPage = () => {
     };
 
     return (
-        <Row justify={"center"} style={{ marginTop: "30px" }}>
-            <Col xs={24} md={16} lg={8}>
-                <fieldset style={{
-                    padding: "15px",
-                    margin: "5px",
-                    border: "1px solid #ccc",
-                    borderRadius: "5px"
-                }}>
-                    <legend>Đăng ký</legend>
+        <Row justify={"center"} style={{ padding: "40px 16px" }}>
+            <Col xs={24} sm={20} md={14} lg={10} xl={8}>
+                <Card
+                    title={<Typography.Title level={3} style={{ margin: 0 }}>Đăng ký</Typography.Title>}
+                    style={{ background: '#ffffff', border: '1px solid #f0f0f0', borderRadius: 8 }}
+                >
                     <Form name="basic" layout="vertical" onFinish={onFinish} autoComplete="off">
                         <Form.Item
                             label="Name"
                             name="name"
                             rules={[{ required: true, message: 'Please input your name!' }]}
                         >
-                            <Input />
+                            <Input size="large" placeholder="Nguyễn Văn A" />
                         </Form.Item>
 
                         <Form.Item
@@ -60,7 +57,7 @@ const RegisterPage = () => {
                             name="email"
                             rules={[{ required: true, message: 'Please input your email!' }]}
                         >
-                            <Input />
+                            <Input size="large" placeholder="you@example.com" />
                         </Form.Item>
 
                         <Form.Item
@@ -68,18 +65,21 @@ const RegisterPage = () => {
                             name="password"
                             rules={[{ required: true, message: 'Please input your password!' }]}
                         >
-                            <Input.Password />
+                            <Input.Password size="large" placeholder="••••••••" />
                         </Form.Item>
 
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" loading={loading}>
+                            <Button type="primary" htmlType="submit" loading={loading} block size="large">
                                 Submit
                             </Button>
                         </Form.Item>
                     </Form>
-                    <Link to="/"><ArrowLeftOutlined /> Quay lại trang chủ</Link>
-                    <div style={{ marginTop: 5 }}>Bạn đã có tài khoản? <Link to="/login">Login</Link></div>
-                </fieldset>
+                    <Divider />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Link to="/"><ArrowLeftOutlined /> Trang chủ</Link>
+                        <span>Bạn đã có tài khoản? <Link to="/login">Login</Link></span>
+                    </div>
+                </Card>
             </Col>
         </Row>
     );
