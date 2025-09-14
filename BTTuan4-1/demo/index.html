@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Shopping Cart Library Demo</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useCallback } = React;
+        
+        // Mock types and components for demo
+        const CartItem = {
+            id: '',
+            name: '',
+            price: 0,
+            quantity: 0,
+            image: '',
+            description: ''
+        };
+        
+        const useCart = () => {
+            const [items, setItems] = useState([]);
+            
+            const addItem = useCallback((item) => {
+                setItems(prevItems => {
+                    const existingItem = prevItems.find(i => i.id === item.id);
+                    if (existingItem) {
+                        return prevItems.map(i =>
+                            i.id === item.id
+                                ? { ...i, quantity: i.quantity + 1 }
+                                : i
+                        );
+                    }
+                    return [...prevItems, { ...item, quantity: 1 }];
+                });
+            }, []);
+            
+            const removeItem = useCallback((id) => {
+                setItems(prevItems => prevItems.filter(item => item.id !== id));
+            }, []);
+            
+            const updateQuantity = useCallback((id, quantity) => {
+                if (quantity <= 0) {
+                    removeItem(id);
+                    return;
+                }
+                
+                setItems(prevItems =>
+                    prevItems.map(item =>
+                        item.id === id ? { ...item, quantity } : item
+                    )
+                );
+            }, [removeItem]);
+            
+            const clearCart = useCallback(() => {
+                setItems([]);
+            }, []);
+            
+            const getTotalPrice = useCallback(() => {
+                return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+            }, [items]);
+            
+            const getTotalItems = useCallback(() => {
+                return items.reduce((total, item) => total + item.quantity, 0);
+            }, [items]);
+            
+            return {
+                items,
+                addItem,
+                removeItem,
+                updateQuantity,
+                clearCart,
+                getTotalPrice,
+                getTotalItems,
+            };
+        };
+        
+        const Button = ({ children, onClick, variant = 'primary', size = 'medium', disabled = false, className = '' }) => {
+            const baseClasses = 'font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+            
+            const variantClasses = {
+                primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+                secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
+                danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+            };
+            
+            const sizeClasses = {
+                small: 'px-3 py-1.5 text-sm',
+                medium: 'px-4 py-2 text-base',
+                large: 'px-6 py-3 text-lg',
+            };
+            
+            const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : '';
+            
+            const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabledClasses} ${className}`;
+            
+            return React.createElement('button', {
+                className: classes,
+                onClick: onClick,
+                disabled: disabled
+            }, children);
+        };
+        
+        const Input = ({ value, onChange, placeholder, type = 'text', disabled = false, className = '', label, error }) => {
+            const baseClasses = 'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+            const errorClasses = error ? 'border-red-500' : 'border-gray-300';
+            const disabledClasses = disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white';
+            
+            const classes = `${baseClasses} ${errorClasses} ${disabledClasses} ${className}`;
+            
+            return React.createElement('div', { className: 'w-full' }, [
+                label && React.createElement('label', { key: 'label', className: 'block text-sm font-medium text-gray-700 mb-1' }, label),
+                React.createElement('input', {
+                    key: 'input',
+                    type: type,
+                    value: value,
+                    onChange: (e) => onChange(e.target.value),
+                    placeholder: placeholder,
+                    disabled: disabled,
+                    className: classes
+                }),
+                error && React.createElement('p', { key: 'error', className: 'mt-1 text-sm text-red-600' }, error)
+            ]);
+        };
+        
+        const Modal = ({ isOpen, onClose, title, children, className = '' }) => {
+            React.useEffect(() => {
+                const handleEscape = (e) => {
+                    if (e.key === 'Escape') {
+                        onClose();
+                    }
+                };
+
+                if (isOpen) {
+                    document.addEventListener('keydown', handleEscape);
+                    document.body.style.overflow = 'hidden';
+                }
+
+                return () => {
+                    document.removeEventListener('keydown', handleEscape);
+                    document.body.style.overflow = 'unset';
+                };
+            }, [isOpen, onClose]);
+
+            if (!isOpen) return null;
+
+            return React.createElement('div', { className: 'fixed inset-0 z-50 overflow-y-auto' }, [
+                React.createElement('div', { key: 'backdrop', className: 'flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0' }, [
+                    React.createElement('div', {
+                        key: 'overlay',
+                        className: 'fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity',
+                        onClick: onClose
+                    }),
+                    React.createElement('span', { key: 'spacer', className: 'hidden sm:inline-block sm:align-middle sm:h-screen', 'aria-hidden': 'true' }, '&#8203;'),
+                    React.createElement('div', { key: 'modal', className: `inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full ${className}` }, [
+                        title && React.createElement('div', { key: 'header', className: 'bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4' }, [
+                            React.createElement('div', { key: 'title-row', className: 'flex items-center justify-between' }, [
+                                React.createElement('h3', { key: 'title', className: 'text-lg leading-6 font-medium text-gray-900' }, title),
+                                React.createElement('button', {
+                                    key: 'close',
+                                    onClick: onClose,
+                                    className: 'text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600'
+                                }, [
+                                    React.createElement('span', { key: 'sr-only', className: 'sr-only' }, 'Close'),
+                                    React.createElement('svg', { key: 'icon', className: 'h-6 w-6', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' }, [
+                                        React.createElement('path', { key: 'path', strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M6 18L18 6M6 6l12 12' })
+                                    ])
+                                ])
+                            ])
+                        ]),
+                        React.createElement('div', { key: 'body', className: 'bg-white px-4 pb-4 sm:p-6 sm:pt-0' }, children)
+                    ])
+                ])
+            ]);
+        };
+        
+        const Card = ({ children, className = '', onClick }) => {
+            const baseClasses = 'bg-white rounded-lg shadow-md border border-gray-200';
+            const clickableClasses = onClick ? 'cursor-pointer hover:shadow-lg transition-shadow' : '';
+            
+            const classes = `${baseClasses} ${clickableClasses} ${className}`;
+            
+            return React.createElement('div', { className: classes, onClick: onClick }, children);
+        };
+        
+        const CartItemCard = ({ item, onUpdateQuantity, onRemove, className = '' }) => {
+            const handleQuantityChange = (newQuantity) => {
+                if (newQuantity <= 0) {
+                    onRemove(item.id);
+                } else {
+                    onUpdateQuantity(item.id, newQuantity);
+                }
+            };
+
+            return React.createElement(Card, { className: `p-4 ${className}` }, [
+                React.createElement('div', { key: 'content', className: 'flex items-center space-x-4' }, [
+                    item.image && React.createElement('img', {
+                        key: 'image',
+                        src: item.image,
+                        alt: item.name,
+                        className: 'w-16 h-16 object-cover rounded-lg'
+                    }),
+                    React.createElement('div', { key: 'info', className: 'flex-1' }, [
+                        React.createElement('h3', { key: 'name', className: 'text-lg font-medium text-gray-900' }, item.name),
+                        item.description && React.createElement('p', { key: 'desc', className: 'text-sm text-gray-500 mt-1' }, item.description),
+                        React.createElement('p', { key: 'price', className: 'text-lg font-semibold text-blue-600 mt-2' }, `$${item.price.toFixed(2)}`)
+                    ]),
+                    React.createElement('div', { key: 'controls', className: 'flex items-center space-x-2' }, [
+                        React.createElement(Button, {
+                            key: 'decrease',
+                            size: 'small',
+                            variant: 'secondary',
+                            onClick: () => handleQuantityChange(item.quantity - 1)
+                        }, '-'),
+                        React.createElement('span', { key: 'quantity', className: 'w-8 text-center font-medium' }, item.quantity),
+                        React.createElement(Button, {
+                            key: 'increase',
+                            size: 'small',
+                            variant: 'secondary',
+                            onClick: () => handleQuantityChange(item.quantity + 1)
+                        }, '+'),
+                        React.createElement(Button, {
+                            key: 'remove',
+                            size: 'small',
+                            variant: 'danger',
+                            onClick: () => onRemove(item.id)
+                        }, 'Remove')
+                    ])
+                ])
+            ]);
+        };
+        
+        const ProductList = ({ className = '', onAddToCart, addItem }) => {
+            const [addedProduct, setAddedProduct] = useState(null);
+            
+            const products = [
+                {
+                    id: '1',
+                    name: 'iPhone 15 Pro',
+                    price: 999,
+                    description: 'Latest iPhone with A17 Pro chip and titanium design',
+                    image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=300&h=300&fit=crop',
+                    category: 'Electronics'
+                },
+                {
+                    id: '2',
+                    name: 'MacBook Air M2',
+                    price: 1199,
+                    description: 'Ultra-thin laptop with M2 chip and all-day battery',
+                    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&h=300&fit=crop',
+                    category: 'Electronics'
+                },
+                {
+                    id: '3',
+                    name: 'AirPods Pro',
+                    price: 249,
+                    description: 'Active noise cancellation and spatial audio',
+                    image: 'https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=300&fit=crop',
+                    category: 'Electronics'
+                },
+                {
+                    id: '4',
+                    name: 'Nike Air Max 270',
+                    price: 150,
+                    description: 'Comfortable running shoes with Max Air cushioning',
+                    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop',
+                    category: 'Fashion'
+                },
+                {
+                    id: '5',
+                    name: 'Coffee Maker',
+                    price: 89,
+                    description: 'Programmable coffee maker with 12-cup capacity',
+                    image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=300&fit=crop',
+                    category: 'Home'
+                },
+                {
+                    id: '6',
+                    name: 'Wireless Mouse',
+                    price: 29,
+                    description: 'Ergonomic wireless mouse with precision tracking',
+                    image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&h=300&fit=crop',
+                    category: 'Electronics'
+                }
+            ];
+
+            const handleAddToCart = (product) => {
+                addItem({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    description: product.description,
+                    image: product.image,
+                });
+                
+                // Hiển thị thông báo đã thêm
+                setAddedProduct(product.name);
+                setTimeout(() => setAddedProduct(null), 2000);
+                
+                // Chuyển sang tab Cart sau khi thêm sản phẩm
+                if (onAddToCart) {
+                    onAddToCart();
+                }
+            };
+
+            const getCategoryColor = (category) => {
+                const colors = {
+                    Electronics: 'bg-blue-100 text-blue-800',
+                    Fashion: 'bg-pink-100 text-pink-800',
+                    Home: 'bg-green-100 text-green-800',
+                };
+                return colors[category] || 'bg-gray-100 text-gray-800';
+            };
+
+            return React.createElement('div', { className: `max-w-6xl mx-auto p-6 ${className}` }, [
+                React.createElement('div', { key: 'header', className: 'mb-8' }, [
+                    React.createElement('h1', { key: 'title', className: 'text-3xl font-bold text-gray-900 mb-2' }, 'Our Products'),
+                    React.createElement('p', { key: 'subtitle', className: 'text-gray-600' }, 'Discover amazing products and add them to your cart')
+                ]),
+                
+                // Thông báo đã thêm sản phẩm
+                addedProduct && React.createElement('div', { 
+                    key: 'notification', 
+                    className: 'mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg' 
+                }, `✅ "${addedProduct}" đã được thêm vào giỏ hàng!`),
+                React.createElement('div', { key: 'products', className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' }, 
+                    products.map((product) => 
+                        React.createElement(Card, { key: product.id, className: 'overflow-hidden hover:shadow-lg transition-shadow' }, [
+                            React.createElement('div', { key: 'image-container', className: 'relative' }, [
+                                React.createElement('img', {
+                                    key: 'image',
+                                    src: product.image,
+                                    alt: product.name,
+                                    className: 'w-full h-48 object-cover'
+                                }),
+                                React.createElement('div', { key: 'category', className: 'absolute top-2 left-2' }, [
+                                    React.createElement('span', {
+                                        key: 'category-badge',
+                                        className: `px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(product.category)}`
+                                    }, product.category)
+                                ])
+                            ]),
+                            React.createElement('div', { key: 'content', className: 'p-4' }, [
+                                React.createElement('h3', { key: 'name', className: 'text-lg font-semibold text-gray-900 mb-2' }, product.name),
+                                React.createElement('p', { key: 'description', className: 'text-gray-600 text-sm mb-3' }, product.description),
+                                React.createElement('div', { key: 'footer', className: 'flex items-center justify-between' }, [
+                                    React.createElement('span', { key: 'price', className: 'text-2xl font-bold text-blue-600' }, `$${product.price}`),
+                                    React.createElement(Button, {
+                                        key: 'add-button',
+                                        onClick: () => handleAddToCart(product),
+                                        className: 'bg-blue-600 hover:bg-blue-700'
+                                    }, 'Add to Cart')
+                                ])
+                            ])
+                        ])
+                    )
+                )
+            ]);
+        };
+        
+        const ShoppingCart = ({ className = '', items, addItem, removeItem, updateQuantity, clearCart, getTotalPrice, getTotalItems }) => {
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [newItem, setNewItem] = useState({
+                name: '',
+                price: '',
+                description: '',
+                image: '',
+            });
+
+            const handleAddItem = () => {
+                if (newItem.name && newItem.price) {
+                    addItem({
+                        id: Date.now().toString(),
+                        name: newItem.name,
+                        price: parseFloat(newItem.price),
+                        description: newItem.description || undefined,
+                        image: newItem.image || undefined,
+                    });
+                    
+                    setNewItem({ name: '', price: '', description: '', image: '' });
+                    setIsModalOpen(false);
+                }
+            };
+
+            return React.createElement('div', { className: `max-w-4xl mx-auto p-6 ${className}` }, [
+                React.createElement('div', { key: 'header', className: 'flex justify-between items-center mb-6' }, [
+                    React.createElement('h1', { key: 'title', className: 'text-3xl font-bold text-gray-900' }, `Shopping Cart (${getTotalItems()})`),
+                    React.createElement('div', { key: 'buttons', className: 'space-x-2' }, [
+                        React.createElement(Button, { key: 'add', onClick: () => setIsModalOpen(true) }, 'Add Item'),
+                        React.createElement(Button, { key: 'clear', variant: 'secondary', onClick: clearCart }, 'Clear Cart')
+                    ])
+                ]),
+                items.length === 0 ? React.createElement('div', { key: 'empty', className: 'text-center py-12' }, [
+                    React.createElement('p', { key: 'text', className: 'text-gray-500 text-lg' }, 'Your cart is empty'),
+                    React.createElement(Button, { key: 'button', className: 'mt-4', onClick: () => setIsModalOpen(true) }, 'Add your first item')
+                ]) : React.createElement('div', { key: 'items', className: 'space-y-4' }, items.map((item) => 
+                    React.createElement(CartItemCard, {
+                        key: item.id,
+                        item: item,
+                        onUpdateQuantity: updateQuantity,
+                        onRemove: removeItem
+                    })
+                )),
+                items.length > 0 && React.createElement('div', { key: 'total', className: 'mt-8 bg-gray-50 rounded-lg p-6' }, [
+                    React.createElement('div', { key: 'total-content', className: 'flex justify-between items-center' }, [
+                        React.createElement('span', { key: 'total-text', className: 'text-xl font-semibold' }, `Total: $${getTotalPrice().toFixed(2)}`),
+                        React.createElement(Button, { key: 'checkout', size: 'large', className: 'bg-green-600 hover:bg-green-700' }, 'Checkout')
+                    ])
+                ]),
+                React.createElement(Modal, {
+                    key: 'modal',
+                    isOpen: isModalOpen,
+                    onClose: () => setIsModalOpen(false),
+                    title: 'Add New Item'
+                }, [
+                    React.createElement('div', { key: 'form', className: 'space-y-4' }, [
+                        React.createElement(Input, {
+                            key: 'name',
+                            label: 'Item Name',
+                            value: newItem.name,
+                            onChange: (value) => setNewItem({ ...newItem, name: value }),
+                            placeholder: 'Enter item name'
+                        }),
+                        React.createElement(Input, {
+                            key: 'price',
+                            label: 'Price',
+                            type: 'number',
+                            value: newItem.price,
+                            onChange: (value) => setNewItem({ ...newItem, price: value }),
+                            placeholder: 'Enter price'
+                        }),
+                        React.createElement(Input, {
+                            key: 'description',
+                            label: 'Description (Optional)',
+                            value: newItem.description,
+                            onChange: (value) => setNewItem({ ...newItem, description: value }),
+                            placeholder: 'Enter description'
+                        }),
+                        React.createElement(Input, {
+                            key: 'image',
+                            label: 'Image URL (Optional)',
+                            value: newItem.image,
+                            onChange: (value) => setNewItem({ ...newItem, image: value }),
+                            placeholder: 'Enter image URL'
+                        }),
+                        React.createElement('div', { key: 'form-buttons', className: 'flex justify-end space-x-2 pt-4' }, [
+                            React.createElement(Button, { key: 'cancel', variant: 'secondary', onClick: () => setIsModalOpen(false) }, 'Cancel'),
+                            React.createElement(Button, { key: 'add', onClick: handleAddItem }, 'Add Item')
+                        ])
+                    ])
+                ])
+            ]);
+        };
+        
+        const App = () => {
+            const [currentView, setCurrentView] = useState('products');
+            const { items, addItem, removeItem, updateQuantity, clearCart, getTotalPrice, getTotalItems } = useCart();
+
+            return React.createElement('div', { className: 'min-h-screen bg-gray-100' }, [
+                React.createElement('nav', { key: 'nav', className: 'bg-white shadow-sm border-b' }, [
+                    React.createElement('div', { key: 'nav-content', className: 'max-w-6xl mx-auto px-6 py-4' }, [
+                        React.createElement('div', { key: 'nav-inner', className: 'flex items-center justify-between' }, [
+                            React.createElement('h1', { key: 'nav-title', className: 'text-2xl font-bold text-gray-900' }, 'Shopping Store'),
+                            React.createElement('div', { key: 'nav-buttons', className: 'flex space-x-4' }, [
+                                React.createElement(Button, {
+                                    key: 'products-btn',
+                                    variant: currentView === 'products' ? 'primary' : 'secondary',
+                                    onClick: () => setCurrentView('products')
+                                }, 'Products'),
+                                React.createElement(Button, {
+                                    key: 'cart-btn',
+                                    variant: currentView === 'cart' ? 'primary' : 'secondary',
+                                    onClick: () => setCurrentView('cart')
+                                }, 'Cart')
+                            ])
+                        ])
+                    ])
+                ]),
+                React.createElement('main', { key: 'main' }, 
+                    currentView === 'products' ? 
+                        React.createElement(ProductList, { 
+                            key: 'product-list',
+                            onAddToCart: () => setCurrentView('cart'),
+                            addItem: addItem
+                        }) : 
+                        React.createElement(ShoppingCart, { 
+                            key: 'shopping-cart',
+                            items: items,
+                            addItem: addItem,
+                            removeItem: removeItem,
+                            updateQuantity: updateQuantity,
+                            clearCart: clearCart,
+                            getTotalPrice: getTotalPrice,
+                            getTotalItems: getTotalItems
+                        })
+                )
+            ]);
+        };
+        
+        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+    </script>
+</body>
+</html>

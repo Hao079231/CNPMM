@@ -1,0 +1,21 @@
+# Source files
+src/
+demo/
+rollup.config.js
+tsconfig.json
+
+# Development files
+.git/
+.gitignore
+README.md
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
